@@ -1,7 +1,8 @@
 // ==UserScript==
-// @name         XenForo Auto-Mod Approval Queue (Delete)
-// @version      1.0
-// @description  Auto-select spam clean or approve in XenForo approval queue
+// @name         XenForo Auto-Mod Approval Queue
+// @namespace    http://tampermonkey.net/
+// @version      1.1
+// @description  Auto-select delete or approve in XenForo approval queue
 // @match        *://*/approval-queue*
 // @grant        none
 // ==/UserScript==
@@ -35,6 +36,10 @@
                 if (Delete) Delete.checked = true;
                 item.style.border = '2px solid red';
                 console.log('🧹 Deleted:', content.slice(0, 80));
+            } else {
+                if (approve) approve.checked = true;
+                item.style.border = '2px solid green';
+                console.log('✅ Approved:', content.slice(0, 80));
             }
 
             count++;
