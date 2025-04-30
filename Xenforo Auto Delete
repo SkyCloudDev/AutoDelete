@@ -1,0 +1,49 @@
+// ==UserScript==
+// @name         XenForo Auto-Mod Approval Queue (Delete)
+// @version      1.0
+// @description  Auto-select spam clean or approve in XenForo approval queue
+// @match        *://*/approval-queue*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    // List of phrases to flag as spam
+    const spamPhrases = [/Blacklisted site/i];
+
+    function isSpam(content) {
+        return spamPhrases.some(regex => regex.test(content));
+    }
+
+    function processItems() {
+        const queueItems = document.querySelectorAll('.message-inner'); // Adjust if your structure differs
+
+        let count = 0;
+
+        queueItems.forEach(item => {
+            const content = item.innerText;
+
+            const radios = item.querySelectorAll('input[type="radio"]');
+            const name = [...radios].find(r => r.value === 'approve')?.name;
+            if (!name) return;
+
+            const Delete = item.querySelector(`input[name="${name}"][value="delete"]`);
+            const approve = item.querySelector(`input[name="${name}"][value="approve"]`);
+
+            if (isSpam(content)) {
+                if (Delete) Delete.checked = true;
+                item.style.border = '2px solid red';
+                console.log('🧹 Deleted:', content.slice(0, 80));
+            }
+
+            count++;
+        });
+
+        console.log(`✅ Processed ${count} moderation items`);
+    }
+
+    window.addEventListener('load', () => {
+        setTimeout(processItems, 1000);
+    });
+})();
