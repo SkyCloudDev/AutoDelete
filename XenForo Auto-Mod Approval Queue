@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         XenForo Auto-Mod Approval Queue
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.4
 // @description  Auto-select delete or approve in XenForo approval queue
 // @match        *://*/approval-queue*
 // @grant        none
@@ -11,8 +11,19 @@
     'use strict';
 
     // List of phrases to flag as spam
-    const spamPhrases = [/Blacklisted site/i, /\/\^\.\{1,3\}\$\//i, /Anything new/i, /\/needs\? \(a \)\?\(big \)\?hero\/i/i];
-    const approvePhrases = [/in forum Premium Site Requests/i];
+    const spamPhrases = [/Blacklisted site/i,
+                         /\/\^\.\{1,3\}\$\//i,
+                         /Anything new/i,
+                         /\/needs\? \(a \)\?\(big \)\?hero\/i/i,
+                         /\/\^any heroe\?s\?\\s\*\(out there\)\?\\W\*\/im/i,
+                         /matched \(\*cdn\*\.onlyfans\.com\*\)/i,
+                         /matched \(n\*.coomer.su\)/i,
+                         /matched \(img.coomer.su\)/i,
+                         /\*no referrals\*/i
+                        ];
+    const approvePhrases = [/in forum Premium Site Requests/i,
+                            /Posted in thread "Who is this\?"/i
+                           ];
 
     function isSpam(content) {
         return spamPhrases.some(regex => regex.test(content));
@@ -36,17 +47,16 @@
             const Delete = item.querySelector(`input[name="${name}"][value="delete"]`);
             const approve = item.querySelector(`input[name="${name}"][value="approve"]`);
 
-            if (isSpam(content)) {
-                if (Delete) Delete.checked = true;
-                item.style.border = '2px solid red';
-                console.log('🧹 Deleted:', content.slice(0, 80));
-            }
             if (isGood(content)){
                 if (approve) approve.checked = true;
                 item.style.border = '2px solid green';
                 console.log('✅ Approved:', content.slice(0, 80));
             }
-
+            if (isSpam(content)) {
+                if (Delete) Delete.checked = true;
+                item.style.border = '2px solid red';
+                console.log('🧹 Deleted:', content.slice(0, 80));
+            }
 
             count++;
         });
